@@ -1,0 +1,1378 @@
+{
+  "cells": [
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "0t2_3ZMBtaj_"
+      },
+      "outputs": [],
+      "source": [
+        "ggtimport pandas as pd\n",
+        "import seaborn as sns\n",
+        "import matplotlib.pyplot as plt\n",
+        "from sklearn.impute import SimpleImputer\n",
+        "from sklearn.model_selection import train_test_split"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 73
+        },
+        "id": "kjry_RaAtpMa",
+        "outputId": "dc2f8bc9-7fc4-4864-8042-3bbdd39e1d07"
+      },
+      "outputs": [
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "\n",
+              "     <input type=\"file\" id=\"files-d481e966-d9e0-4290-8777-96136243db6f\" name=\"files[]\" multiple disabled\n",
+              "        style=\"border:none\" />\n",
+              "     <output id=\"result-d481e966-d9e0-4290-8777-96136243db6f\">\n",
+              "      Upload widget is only available when the cell has been executed in the\n",
+              "      current browser session. Please rerun this cell to enable.\n",
+              "      </output>\n",
+              "      <script>// Copyright 2017 Google LLC\n",
+              "//\n",
+              "// Licensed under the Apache License, Version 2.0 (the \"License\");\n",
+              "// you may not use this file except in compliance with the License.\n",
+              "// You may obtain a copy of the License at\n",
+              "//\n",
+              "//      http://www.apache.org/licenses/LICENSE-2.0\n",
+              "//\n",
+              "// Unless required by applicable law or agreed to in writing, software\n",
+              "// distributed under the License is distributed on an \"AS IS\" BASIS,\n",
+              "// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n",
+              "// See the License for the specific language governing permissions and\n",
+              "// limitations under the License.\n",
+              "\n",
+              "/**\n",
+              " * @fileoverview Helpers for google.colab Python module.\n",
+              " */\n",
+              "(function(scope) {\n",
+              "function span(text, styleAttributes = {}) {\n",
+              "  const element = document.createElement('span');\n",
+              "  element.textContent = text;\n",
+              "  for (const key of Object.keys(styleAttributes)) {\n",
+              "    element.style[key] = styleAttributes[key];\n",
+              "  }\n",
+              "  return element;\n",
+              "}\n",
+              "\n",
+              "// Max number of bytes which will be uploaded at a time.\n",
+              "const MAX_PAYLOAD_SIZE = 100 * 1024;\n",
+              "\n",
+              "function _uploadFiles(inputId, outputId) {\n",
+              "  const steps = uploadFilesStep(inputId, outputId);\n",
+              "  const outputElement = document.getElementById(outputId);\n",
+              "  // Cache steps on the outputElement to make it available for the next call\n",
+              "  // to uploadFilesContinue from Python.\n",
+              "  outputElement.steps = steps;\n",
+              "\n",
+              "  return _uploadFilesContinue(outputId);\n",
+              "}\n",
+              "\n",
+              "// This is roughly an async generator (not supported in the browser yet),\n",
+              "// where there are multiple asynchronous steps and the Python side is going\n",
+              "// to poll for completion of each step.\n",
+              "// This uses a Promise to block the python side on completion of each step,\n",
+              "// then passes the result of the previous step as the input to the next step.\n",
+              "function _uploadFilesContinue(outputId) {\n",
+              "  const outputElement = document.getElementById(outputId);\n",
+              "  const steps = outputElement.steps;\n",
+              "\n",
+              "  const next = steps.next(outputElement.lastPromiseValue);\n",
+              "  return Promise.resolve(next.value.promise).then((value) => {\n",
+              "    // Cache the last promise value to make it available to the next\n",
+              "    // step of the generator.\n",
+              "    outputElement.lastPromiseValue = value;\n",
+              "    return next.value.response;\n",
+              "  });\n",
+              "}\n",
+              "\n",
+              "/**\n",
+              " * Generator function which is called between each async step of the upload\n",
+              " * process.\n",
+              " * @param {string} inputId Element ID of the input file picker element.\n",
+              " * @param {string} outputId Element ID of the output display.\n",
+              " * @return {!Iterable<!Object>} Iterable of next steps.\n",
+              " */\n",
+              "function* uploadFilesStep(inputId, outputId) {\n",
+              "  const inputElement = document.getElementById(inputId);\n",
+              "  inputElement.disabled = false;\n",
+              "\n",
+              "  const outputElement = document.getElementById(outputId);\n",
+              "  outputElement.innerHTML = '';\n",
+              "\n",
+              "  const pickedPromise = new Promise((resolve) => {\n",
+              "    inputElement.addEventListener('change', (e) => {\n",
+              "      resolve(e.target.files);\n",
+              "    });\n",
+              "  });\n",
+              "\n",
+              "  const cancel = document.createElement('button');\n",
+              "  inputElement.parentElement.appendChild(cancel);\n",
+              "  cancel.textContent = 'Cancel upload';\n",
+              "  const cancelPromise = new Promise((resolve) => {\n",
+              "    cancel.onclick = () => {\n",
+              "      resolve(null);\n",
+              "    };\n",
+              "  });\n",
+              "\n",
+              "  // Wait for the user to pick the files.\n",
+              "  const files = yield {\n",
+              "    promise: Promise.race([pickedPromise, cancelPromise]),\n",
+              "    response: {\n",
+              "      action: 'starting',\n",
+              "    }\n",
+              "  };\n",
+              "\n",
+              "  cancel.remove();\n",
+              "\n",
+              "  // Disable the input element since further picks are not allowed.\n",
+              "  inputElement.disabled = true;\n",
+              "\n",
+              "  if (!files) {\n",
+              "    return {\n",
+              "      response: {\n",
+              "        action: 'complete',\n",
+              "      }\n",
+              "    };\n",
+              "  }\n",
+              "\n",
+              "  for (const file of files) {\n",
+              "    const li = document.createElement('li');\n",
+              "    li.append(span(file.name, {fontWeight: 'bold'}));\n",
+              "    li.append(span(\n",
+              "        `(${file.type || 'n/a'}) - ${file.size} bytes, ` +\n",
+              "        `last modified: ${\n",
+              "            file.lastModifiedDate ? file.lastModifiedDate.toLocaleDateString() :\n",
+              "                                    'n/a'} - `));\n",
+              "    const percent = span('0% done');\n",
+              "    li.appendChild(percent);\n",
+              "\n",
+              "    outputElement.appendChild(li);\n",
+              "\n",
+              "    const fileDataPromise = new Promise((resolve) => {\n",
+              "      const reader = new FileReader();\n",
+              "      reader.onload = (e) => {\n",
+              "        resolve(e.target.result);\n",
+              "      };\n",
+              "      reader.readAsArrayBuffer(file);\n",
+              "    });\n",
+              "    // Wait for the data to be ready.\n",
+              "    let fileData = yield {\n",
+              "      promise: fileDataPromise,\n",
+              "      response: {\n",
+              "        action: 'continue',\n",
+              "      }\n",
+              "    };\n",
+              "\n",
+              "    // Use a chunked sending to avoid message size limits. See b/62115660.\n",
+              "    let position = 0;\n",
+              "    do {\n",
+              "      const length = Math.min(fileData.byteLength - position, MAX_PAYLOAD_SIZE);\n",
+              "      const chunk = new Uint8Array(fileData, position, length);\n",
+              "      position += length;\n",
+              "\n",
+              "      const base64 = btoa(String.fromCharCode.apply(null, chunk));\n",
+              "      yield {\n",
+              "        response: {\n",
+              "          action: 'append',\n",
+              "          file: file.name,\n",
+              "          data: base64,\n",
+              "        },\n",
+              "      };\n",
+              "\n",
+              "      let percentDone = fileData.byteLength === 0 ?\n",
+              "          100 :\n",
+              "          Math.round((position / fileData.byteLength) * 100);\n",
+              "      percent.textContent = `${percentDone}% done`;\n",
+              "\n",
+              "    } while (position < fileData.byteLength);\n",
+              "  }\n",
+              "\n",
+              "  // All done.\n",
+              "  yield {\n",
+              "    response: {\n",
+              "      action: 'complete',\n",
+              "    }\n",
+              "  };\n",
+              "}\n",
+              "\n",
+              "scope.google = scope.google || {};\n",
+              "scope.google.colab = scope.google.colab || {};\n",
+              "scope.google.colab._files = {\n",
+              "  _uploadFiles,\n",
+              "  _uploadFilesContinue,\n",
+              "};\n",
+              "})(self);\n",
+              "</script> "
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Saving Titanic-Dataset.csv to Titanic-Dataset.csv\n"
+          ]
+        }
+      ],
+      "source": [
+        "from google.colab import files\n",
+        "uploaded = files.upload()"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "CLcKUukrtsgy"
+      },
+      "outputs": [],
+      "source": [
+        "import pandas as pd\n",
+        "titanic_df = pd.read_csv(\"Titanic-Dataset.csv\")"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "n1bGEHTfuj3F",
+        "outputId": "27782d0a-6b86-4d54-e79c-2d5f3969a659"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Shape of the dataset: (891, 12)\n"
+          ]
+        }
+      ],
+      "source": [
+        "shape_of_data = titanic_df.shape\n",
+        "print(\"Shape of the dataset:\", shape_of_data)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "bhWZIcLQuzEC",
+        "outputId": "dc8e91ae-082c-4689-ebc3-096ab72138bf"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Info about the dataset:\n",
+            "<class 'pandas.core.frame.DataFrame'>\n",
+            "RangeIndex: 891 entries, 0 to 890\n",
+            "Data columns (total 12 columns):\n",
+            " #   Column       Non-Null Count  Dtype  \n",
+            "---  ------       --------------  -----  \n",
+            " 0   PassengerId  891 non-null    int64  \n",
+            " 1   Survived     891 non-null    int64  \n",
+            " 2   Pclass       891 non-null    int64  \n",
+            " 3   Name         891 non-null    object \n",
+            " 4   Sex          891 non-null    object \n",
+            " 5   Age          714 non-null    float64\n",
+            " 6   SibSp        891 non-null    int64  \n",
+            " 7   Parch        891 non-null    int64  \n",
+            " 8   Ticket       891 non-null    object \n",
+            " 9   Fare         891 non-null    float64\n",
+            " 10  Cabin        204 non-null    object \n",
+            " 11  Embarked     889 non-null    object \n",
+            "dtypes: float64(2), int64(5), object(5)\n",
+            "memory usage: 83.7+ KB\n"
+          ]
+        }
+      ],
+      "source": [
+        "print(\"Info about the dataset:\")\n",
+        "titanic_df_info = titanic_df.info()"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "SeVxdqshu104",
+        "outputId": "d580962d-56c9-4ad1-913e-e05e6b65d4db"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Statistical Description of dataset:\n",
+            "       PassengerId    Survived      Pclass         Age       SibSp  \\\n",
+            "count   891.000000  891.000000  891.000000  714.000000  891.000000   \n",
+            "mean    446.000000    0.383838    2.308642   29.699118    0.523008   \n",
+            "std     257.353842    0.486592    0.836071   14.526497    1.102743   \n",
+            "min       1.000000    0.000000    1.000000    0.420000    0.000000   \n",
+            "25%     223.500000    0.000000    2.000000   20.125000    0.000000   \n",
+            "50%     446.000000    0.000000    3.000000   28.000000    0.000000   \n",
+            "75%     668.500000    1.000000    3.000000   38.000000    1.000000   \n",
+            "max     891.000000    1.000000    3.000000   80.000000    8.000000   \n",
+            "\n",
+            "            Parch        Fare  \n",
+            "count  891.000000  891.000000  \n",
+            "mean     0.381594   32.204208  \n",
+            "std      0.806057   49.693429  \n",
+            "min      0.000000    0.000000  \n",
+            "25%      0.000000    7.910400  \n",
+            "50%      0.000000   14.454200  \n",
+            "75%      0.000000   31.000000  \n",
+            "max      6.000000  512.329200  \n"
+          ]
+        }
+      ],
+      "source": [
+        "titanic_df_description = titanic_df.describe()\n",
+        "print(\"Statistical Description of dataset:\")\n",
+        "print(titanic_df_description)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "sYaYy7FSu4nZ",
+        "outputId": "c853e530-0dae-4663-86b2-e0de40a72281"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "   PassengerId  Survived  Pclass  \\\n",
+            "0            1         0       3   \n",
+            "1            2         1       1   \n",
+            "2            3         1       3   \n",
+            "3            4         1       1   \n",
+            "4            5         0       3   \n",
+            "\n",
+            "                                                Name     Sex   Age  SibSp  \\\n",
+            "0                            Braund, Mr. Owen Harris    male  22.0      1   \n",
+            "1  Cumings, Mrs. John Bradley (Florence Briggs Th...  female  38.0      1   \n",
+            "2                             Heikkinen, Miss. Laina  female  26.0      0   \n",
+            "3       Futrelle, Mrs. Jacques Heath (Lily May Peel)  female  35.0      1   \n",
+            "4                           Allen, Mr. William Henry    male  35.0      0   \n",
+            "\n",
+            "   Parch            Ticket     Fare Cabin Embarked  \n",
+            "0      0         A/5 21171   7.2500   NaN        S  \n",
+            "1      0          PC 17599  71.2833   C85        C  \n",
+            "2      0  STON/O2. 3101282   7.9250   NaN        S  \n",
+            "3      0            113803  53.1000  C123        S  \n",
+            "4      0            373450   8.0500   NaN        S  \n"
+          ]
+        }
+      ],
+      "source": [
+        "age_imputer = SimpleImputer(missing_values=pd.NA, strategy='mean')\n",
+        "titanic_df['Age'] = age_imputer.fit_transform(titanic_df[['Age']])\n",
+        "print(titanic_df.head())"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "2nf-L2YHu7xs",
+        "outputId": "ad7f256c-44f4-4eb2-db23-0189bedf7630"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "   PassengerId  Survived  Pclass  \\\n",
+            "0            1         0       3   \n",
+            "1            2         1       1   \n",
+            "2            3         1       3   \n",
+            "3            4         1       1   \n",
+            "4            5         0       3   \n",
+            "\n",
+            "                                                Name     Sex   Age  SibSp  \\\n",
+            "0                            Braund, Mr. Owen Harris    male  22.0      1   \n",
+            "1  Cumings, Mrs. John Bradley (Florence Briggs Th...  female  38.0      1   \n",
+            "2                             Heikkinen, Miss. Laina  female  26.0      0   \n",
+            "3       Futrelle, Mrs. Jacques Heath (Lily May Peel)  female  35.0      1   \n",
+            "4                           Allen, Mr. William Henry    male  35.0      0   \n",
+            "\n",
+            "   Parch            Ticket     Fare    Cabin Embarked  \n",
+            "0      0         A/5 21171   7.2500  Unknown        S  \n",
+            "1      0          PC 17599  71.2833      C85        C  \n",
+            "2      0  STON/O2. 3101282   7.9250  Unknown        S  \n",
+            "3      0            113803  53.1000     C123        S  \n",
+            "4      0            373450   8.0500  Unknown        S  \n"
+          ]
+        }
+      ],
+      "source": [
+        "titanic_df['Cabin'] = titanic_df['Cabin'].fillna(\"Unknown\")\n",
+        "print(titanic_df.head())"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "embarked_mode = titanic_df['Embarked'].mode()[0]\n",
+        "titanic_df['Embarked'] = titanic_df['Embarked'].fillna(embarked_mode)\n",
+        "print(titanic_df.head())"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "F1gKSwjelMQK",
+        "outputId": "95401214-b2e0-49a6-f173-a5f78359b8a8"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "   PassengerId  Survived  Pclass  \\\n",
+            "0            1         0       3   \n",
+            "1            2         1       1   \n",
+            "2            3         1       3   \n",
+            "3            4         1       1   \n",
+            "4            5         0       3   \n",
+            "\n",
+            "                                                Name     Sex   Age  SibSp  \\\n",
+            "0                            Braund, Mr. Owen Harris    male  22.0      1   \n",
+            "1  Cumings, Mrs. John Bradley (Florence Briggs Th...  female  38.0      1   \n",
+            "2                             Heikkinen, Miss. Laina  female  26.0      0   \n",
+            "3       Futrelle, Mrs. Jacques Heath (Lily May Peel)  female  35.0      1   \n",
+            "4                           Allen, Mr. William Henry    male  35.0      0   \n",
+            "\n",
+            "   Parch            Ticket     Fare    Cabin Embarked  \n",
+            "0      0         A/5 21171   7.2500  Unknown        S  \n",
+            "1      0          PC 17599  71.2833      C85        C  \n",
+            "2      0  STON/O2. 3101282   7.9250  Unknown        S  \n",
+            "3      0            113803  53.1000     C123        S  \n",
+            "4      0            373450   8.0500  Unknown        S  \n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "sns.countplot(data=titanic_df, x='Pclass')\n",
+        "plt.title(\"Passenger Class Distribution\")\n",
+        "plt.xlabel(\"Passenger Class\")\n",
+        "plt.ylabel(\"Count\")\n",
+        "plt.show()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 472
+        },
+        "id": "OG5thNjRmuOZ",
+        "outputId": "c463005f-1539-44df-c661-b0071da29dea"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<Figure size 640x480 with 1 Axes>"
+            ],
+            "image/png": "iVBORw0KGgoAAAANSUhEUgAAAjsAAAHHCAYAAABZbpmkAAAAOnRFWHRTb2Z0d2FyZQBNYXRwbG90bGliIHZlcnNpb24zLjEwLjAsIGh0dHBzOi8vbWF0cGxvdGxpYi5vcmcvlHJYcgAAAAlwSFlzAAAPYQAAD2EBqD+naQAAO59JREFUeJzt3X1cVGX+//H3cI/AgCCCrqCmqWCam6ZSZiUkumSaljeZoZntGuiqZX7tRo1qKSs1C7PcVrqRNc3MjfVe8aa8STFLMW8oTUsBywQ1uRHO749+nG0C7xAdOr6ej8c8Hp7rus6cz5mZmjfnXOeMzTAMQwAAABbl4uwCAAAALifCDgAAsDTCDgAAsDTCDgAAsDTCDgAAsDTCDgAAsDTCDgAAsDTCDgAAsDTCDgAAsDTCDoAab82aNbLZbFqzZo2zS7lkjRo10uDBgy/7dg4cOCCbzabU1FSzbfDgwfL19b3s2y5ns9k0adKkK7Y94GwIO8BvpKamymazmQ8vLy81a9ZMiYmJys3NdXZ5lrRw4UJ1795dderUkYeHh+rXr6++fftq9erVzi7tvG677Tbzs+Li4iK73a7mzZtr0KBBWrFiRbVtZ/HixTU2NNTk2oBybs4uAKiJkpKS1LhxYxUWFurTTz/VG2+8ocWLF2vnzp2qVauWs8uzBMMw9OCDDyo1NVV//vOfNWbMGIWGhurIkSNauHChoqOj9dlnn+mmm25ydqnn1KBBAyUnJ0uSTp06pezsbH300Ud6//331bdvX73//vtyd3c3x+/Zs0cuLhf3d+bixYuVkpJyUaGiYcOGOn36tMO2L4dz1Xb69Gm5ufE1A+fjUwhUonv37mrXrp0k6aGHHlJQUJCmTJmiRYsWacCAAU6u7o+hrKxMxcXF8vLyqrT/lVdeUWpqqkaNGqUpU6bIZrOZfU8++aTee++9P8QXpb+/v+6//36HthdeeEEjR47UjBkz1KhRI7344otmn6en52Wt58yZMyorK5OHh8dZX/srxdnbB8pxGgu4AF26dJEk7d+/X5L08ssv66abblJQUJC8vb3Vtm1bffjhhxXWW7FihTp16qSAgAD5+vqqefPmeuKJJxzGvPbaa2rZsqVq1aql2rVrq127dkpLS3MY88MPP+jBBx9USEiIPD091bJlS/3rX/9yGFM+r2XevHl6/vnn1aBBA3l5eSk6OlrZ2dkVaktJSdE111wjb29vtW/fXuvXr9dtt92m2267zWFcUVGRJk6cqKZNm8rT01NhYWF6/PHHVVRU5DDOZrMpMTFRc+bMUcuWLeXp6amlS5dW+nqePn1aycnJatGihV5++WWHoFNu0KBBat++faXrS9L69et17733Kjw83Kxr9OjROn36tMO4nJwcDRkyRA0aNJCnp6fq1aunnj176sCBA+aYrVu3KjY2VnXq1JG3t7caN26sBx988KzbPh9XV1dNnz5dkZGRev3115Wfn2/2/X7OTklJiZ555hlde+218vLyUlBQkDp16mSeBhs8eLBSUlIkyeEUq/S/eTkvv/yypk2bpiZNmsjT01O7du2qdM5OuW+//VaxsbHy8fFR/fr1lZSUJMMwzP6zzZH6/XOeq7bytt8f8fniiy/UvXt32e12+fr6Kjo6Wps2bXIYU346+bPPPtOYMWMUHBwsHx8f3X333Tp69Oj53wDgd2r+n01ADfDNN99IkoKCgiRJr776qu666y4NHDhQxcXFmjt3ru69916lp6crLi5OkpSVlaU777xTrVu3VlJSkjw9PZWdna3PPvvMfN5Zs2Zp5MiRuueee/T3v/9dhYWF+uqrr7R582bdd999kqTc3Fx17NjRDBPBwcFasmSJhg4dqoKCAo0aNcqh1hdeeEEuLi567LHHlJ+fr8mTJ2vgwIHavHmzOeaNN95QYmKibrnlFo0ePVoHDhxQr169VLt2bTVo0MAcV1ZWprvuukuffvqpHn74YUVERGjHjh2aOnWq9u7dq48//thh26tXr9a8efOUmJioOnXqqFGjRpW+np9++qmOHTumUaNGydXVtUrvyfz58/XLL79o+PDhCgoK0ueff67XXntN33//vebPn2+O69Onj7KysjRixAg1atRIeXl5WrFihQ4ePGgud+3aVcHBwfq///s/BQQE6MCBA/roo4+qVFc5V1dXDRgwQE8//bQ+/fRT83Pxe5MmTVJycrIeeughtW/fXgUFBdq6dau2bdumO+64Q3/96191+PBhrVixQu+9916lzzF79mwVFhbq4YcflqenpwIDA1VWVlbp2NLSUnXr1k0dO3bU5MmTtXTpUk2cOFFnzpxRUlLSRe3jhdT2W1lZWbrllltkt9v1+OOPy93dXW+++aZuu+02rV27Vh06dHAYP2LECNWuXVsTJ07U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o4EDB+rgwYOSpMzMTJWUlCgmJsYc26JFC4WHh2vjxo2SpI0bN6pVq1YKCQkxx8TGxqqgoEBZWVln3WZRUZEKCgocHgAAwJqcGnY6dOig1NRULV26VG+88Yb279+vW265RSdOnFBOTo48PDwUEBDgsE5ISIhycnIkSTk5OQ5Bp7y/vO9skpOT5e/vbz74qQgAAKzLqaexunfvbv67devW6tChgxo2bKh58+bJ29v7sm13/PjxGjNmjLlcfrtpAABgPU4/jfVbAQEBatasmbKzsxUaGqri4mIdP37cYUxubq45xyc0NLTC1Vnly5XNAyrn6elp/jQEPxEBAIC11aiwc/LkSX3zzTeqV6+e2rZtK3d3d61atcrs37Nnjw4ePKioqChJUlRUlHbs2KG8vDxzzIoVK2S32xUZGXnF6wcAADWPU09jPfbYY+rRo4caNmyow4cPa+LEiXJ1ddWAAQPk7++voUOHasyYMQoMDJTdbteIESMUFRWljh07SpK6du2qyMhIDRo0SJMnT1ZOTo6eeuopJSQkyNPT05m7BgAAaginhp3vv/9eAwYM0E8//aTg4GB16tRJmzZtUnBwsCRp6tSpcnFxUZ8+fVRUVKTY2FjNmDHDXN/V1VXp6ekaPny4oqKi5OPjo/j4eCUlJTlrlwAAQA1jMwzDcHYRzlZQUCB/f3/l5+czfwcAgD+IC/3+dvpNBQEAV4+2Y991dgmoQTJfeuCKbKdGTVAGAACoboQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABgaYQdAABg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ysrSihUrlJ6ernXr1unhhx++UrsAAABqODdnbrx79+7q3r17pX2GYWjatGl66qmn1LNnT0nSu+++q5CQEH388cfq37+/vv76ay1dulRbtmxRu3btJEmvvfaa/vKXv+jll19W/fr1r9i+AACAmqnGztnZv3+/cnJyFBMTY7b5+/urQ4cO2rhxoyRp48aNCggIMIOOJMXExMjFxUWbN28+63MXFRWpoKDA4QEAAKypxoadnJwcSVJISIhDe0hIiNmXk5OjunXrOvS7ubkpMDDQHFOZ5ORk+fv7m4+wsLBqrh4AANQUNTbsXE7jx49Xfn6++Th06JCzSwIAAJdJjQ07oaGhkqTc3FyH9tzcXLMvNDRUeXl5Dv1nzpzRsWPHzDGV8fT0lN1ud3gAAABrqrFhp3HjxgoNDdWqVavMtoKCAm3evFlRUVGSpKioKB0/flyZmZnmmNWrV6usrEwdOnS44jUDAICax6lXY508eVLZ2dnm8v79+7V9+3YFBgYqPDxco0aN0nPPPadrr71WjRs31tNPP6369eurV69ekqSIiAh169ZNw4YN08yZM1VSUqLExET179+fK7EAAIAkJ4edrVu36vbbbzeXx4wZI0mKj49XamqqHn/8cZ06dUoPP/ywjh8/rk6dOmnp0qXy8vIy15kzZ44SExMVHR0tFxcX9enTR9OnT7/i+wIAAGomp4ad2267TYZhnLXfZrMpKSlJSUlJZx0TGBiotLS0y1EeAACwgBo7ZwcAAKA6EHYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAIClEXYAAICl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nz6tvn376p577pEkhYWFac+ePZoxY4a8vb31yCOPqHPnzg7zlgBUjrADwOTj46OmTZsqPDxcbm7/m9KXmZmpsrIyvfLKK+rYsaOaNWumw4cPV1g/LCxMf/vb3/TRRx/p0Ucf1axZs8y+4OBgxcfH6/3339e0adP01ltvSfr1C37fvn2qW7eumjZt6vA429yX32vevLnOnDmjL774wmzLzs7Wzz//bC7fcMMNysnJkZubW4Xt1KlT56Jep/vuu0979+7VokWLKvQZhqH8/PwK7T/99JP27Nmjp556StHR0YqIiHCor5zdble/fv00a9YsffDBB1qwYIGOHTsm6dc5VD169ND06dO1Zs0abdy4UTt27Lio2oGrEWEHwHk1bdpUJSUleu211/Ttt9/qvffe08yZMx3GjBo1SsuWLdP+/fu1bds2ZWRkKCIiQpI0YcIELVq0SNnZ2crKylJ6errZN3DgQNWpU0c9e/bU+vXrtX//fq1Zs0YjR47U999/f0H1tWjRQjExMXr44Yf1+eef64svvtDDDz8sb29v2Ww2SVJMTIyioqLUq1cvLV++XAcOHNCGDRv05JNPauvWrRf1evTt21f9+vXTgAED9I9//ENbt27Vd999p/T0dMXExCgjI6PCOrVr11ZQUJDeeustZWdna/Xq1RozZozDmClTpujf//63du/erb1792r+/PkKDQ1VQECAUlNT9fbbb2vnzp369ttv9f7778vb21sNGza8qNqBqxFhB8B5XX/99ZoyZYpefPFFXXfddZozZ455SXS50tJSJSQkKCIiQt26dVOzZs3MK7U8PDw0fvx4tW7dWp07d5arq6vmzp0rSapVq5bWrVun8PBw9e7dWxERERo6dKgKCwtlt9svuMZ3331XISEh6ty5s+6++24NGzZMfn5+5uXjNptNixcvVufOnTVkyBA1a9ZM/fv313fffaeQkJCLej1sNpvS0tI0ZcoUffzxx7r11lvVunVrTZo0ST179lRsbGyFdVxcXDR37lxlZmbquuuu0+jRoyvcw8jPz0+TJ09Wu3btdOONN+rAgQNavHixXFxcFBAQoFmzZunmm29W69attXLlSn3yyScKCgq6qNqBq5HNqOpMOwCowb7//nuFhYWZE6sBXL0IOwAsYfXq1Tp58qRatWqlI0eO6PHHH9cPP/ygvXv3VpjcDODqwk0FAVhCSUmJnnjiCX377bfy8/PTTTfdpDlz5hB0AHBkBwAAWBsTlAEAgKURdgAAgKURdgAAgKURdgAAgKURdgAAgKURdgAAgKURdgAAgKURdgAAgKURdgAAgKX9P0qr3NfC0A8vAAAAAElFTkSuQmCC\n"
+          },
+          "metadata": {}
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "females_survived = titanic_df[(titanic_df['Sex'] == 'female') & (titanic_df['Survived'] == 1)]\n",
+        "female_names = females_survived['Name']\n",
+        "print(\"Names of female passengers who survived:\")\n",
+        "print(female_names)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "8ZqHnsA3m4nY",
+        "outputId": "fd662ab8-a585-4028-9364-41b9120d47e0"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Names of female passengers who survived:\n",
+            "1      Cumings, Mrs. John Bradley (Florence Briggs Th...\n",
+            "2                                 Heikkinen, Miss. Laina\n",
+            "3           Futrelle, Mrs. Jacques Heath (Lily May Peel)\n",
+            "8      Johnson, Mrs. Oscar W (Elisabeth Vilhelmina Berg)\n",
+            "9                    Nasser, Mrs. Nicholas (Adele Achem)\n",
+            "                             ...                        \n",
+            "874                Abelson, Mrs. Samuel (Hannah Wizosky)\n",
+            "875                     Najib, Miss. Adele Kiamie \"Jane\"\n",
+            "879        Potter, Mrs. Thomas Jr (Lily Alexenia Wilson)\n",
+            "880         Shelley, Mrs. William (Imanita Parrish Hall)\n",
+            "887                         Graham, Miss. Margaret Edith\n",
+            "Name: Name, Length: 233, dtype: object\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "third_class_young = titanic_df[(titanic_df['Pclass'] == 3) & (titanic_df['Age'] < 18)]\n",
+        "print(\"Passengers in 3rd class and under 18:\")\n",
+        "print(third_class_young)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "aQOXdwpum7pJ",
+        "outputId": "8d3e8f0d-af70-44e3-d650-1dcdf1285c72"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Passengers in 3rd class and under 18:\n",
+            "     PassengerId  Survived  Pclass                                     Name  \\\n",
+            "7              8         0       3           Palsson, Master. Gosta Leonard   \n",
+            "10            11         1       3          Sandstrom, Miss. Marguerite Rut   \n",
+            "14            15         0       3     Vestrom, Miss. Hulda Amanda Adolfina   \n",
+            "16            17         0       3                     Rice, Master. Eugene   \n",
+            "22            23         1       3              McGowan, Miss. Anna \"Annie\"   \n",
+            "..           ...       ...     ...                                      ...   \n",
+            "844          845         0       3                      Culumovic, Mr. Jeso   \n",
+            "850          851         0       3  Andersson, Master. Sigvard Harald Elias   \n",
+            "852          853         0       3                  Boulos, Miss. Nourelain   \n",
+            "869          870         1       3          Johnson, Master. Harold Theodor   \n",
+            "875          876         1       3         Najib, Miss. Adele Kiamie \"Jane\"   \n",
+            "\n",
+            "        Sex   Age  SibSp  Parch   Ticket     Fare    Cabin Embarked  \n",
+            "7      male   2.0      3      1   349909  21.0750  Unknown        S  \n",
+            "10   female   4.0      1      1  PP 9549  16.7000       G6        S  \n",
+            "14   female  14.0      0      0   350406   7.8542  Unknown        S  \n",
+            "16     male   2.0      4      1   382652  29.1250  Unknown        Q  \n",
+            "22   female  15.0      0      0   330923   8.0292  Unknown        Q  \n",
+            "..      ...   ...    ...    ...      ...      ...      ...      ...  \n",
+            "844    male  17.0      0      0   315090   8.6625  Unknown        S  \n",
+            "850    male   4.0      4      2   347082  31.2750  Unknown        S  \n",
+            "852  female   9.0      1      1     2678  15.2458  Unknown        C  \n",
+            "869    male   4.0      1      1   347742  11.1333  Unknown        S  \n",
+            "875  female  15.0      0      0     2667   7.2250  Unknown        C  \n",
+            "\n",
+            "[78 rows x 12 columns]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "first_class_elder = titanic_df[(titanic_df['Pclass'] == 1) & (titanic_df['Age'] > 40)]\n",
+        "print(\"Passengers in 1st class and older than 40:\")\n",
+        "print(first_class_elder)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "fTQ5ikOSm_AA",
+        "outputId": "4cf5f5c4-bf20-47fe-f39e-7cef1352be5a"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Passengers in 1st class and older than 40:\n",
+            "     PassengerId  Survived  Pclass  \\\n",
+            "6              7         0       1   \n",
+            "11            12         1       1   \n",
+            "35            36         0       1   \n",
+            "52            53         1       1   \n",
+            "54            55         0       1   \n",
+            "..           ...       ...     ...   \n",
+            "856          857         1       1   \n",
+            "857          858         1       1   \n",
+            "862          863         1       1   \n",
+            "871          872         1       1   \n",
+            "879          880         1       1   \n",
+            "\n",
+            "                                                  Name     Sex   Age  SibSp  \\\n",
+            "6                              McCarthy, Mr. Timothy J    male  54.0      0   \n",
+            "11                            Bonnell, Miss. Elizabeth  female  58.0      0   \n",
+            "35                      Holverson, Mr. Alexander Oskar    male  42.0      1   \n",
+            "52            Harper, Mrs. Henry Sleeper (Myna Haxtun)  female  49.0      1   \n",
+            "54                      Ostby, Mr. Engelhart Cornelius    male  65.0      0   \n",
+            "..                                                 ...     ...   ...    ...   \n",
+            "856         Wick, Mrs. George Dennick (Mary Hitchcock)  female  45.0      1   \n",
+            "857                             Daly, Mr. Peter Denis     male  51.0      0   \n",
+            "862  Swift, Mrs. Frederick Joel (Margaret Welles Ba...  female  48.0      0   \n",
+            "871   Beckwith, Mrs. Richard Leonard (Sallie Monypeny)  female  47.0      1   \n",
+            "879      Potter, Mrs. Thomas Jr (Lily Alexenia Wilson)  female  56.0      0   \n",
+            "\n",
+            "     Parch    Ticket      Fare    Cabin Embarked  \n",
+            "6        0     17463   51.8625      E46        S  \n",
+            "11       0    113783   26.5500     C103        S  \n",
+            "35       0    113789   52.0000  Unknown        S  \n",
+            "52       0  PC 17572   76.7292      D33        C  \n",
+            "54       1    113509   61.9792      B30        C  \n",
+            "..     ...       ...       ...      ...      ...  \n",
+            "856      1     36928  164.8667  Unknown        S  \n",
+            "857      0    113055   26.5500      E17        S  \n",
+            "862      0     17466   25.9292      D17        S  \n",
+            "871      1     11751   52.5542      D35        S  \n",
+            "879      1     11767   83.1583      C50        C  \n",
+            "\n",
+            "[76 rows x 12 columns]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "first_class_elder_survived = first_class_elder[first_class_elder['Survived'] == 1]\n",
+        "print(\"Survived passengers in 1st class and older than 40:\")\n",
+        "print(first_class_elder_survived)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "IVybI2ovnURy",
+        "outputId": "f519c6f1-c983-4765-9a02-109a38eaef89"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Survived passengers in 1st class and older than 40:\n",
+            "     PassengerId  Survived  Pclass  \\\n",
+            "11            12         1       1   \n",
+            "52            53         1       1   \n",
+            "187          188         1       1   \n",
+            "194          195         1       1   \n",
+            "195          196         1       1   \n",
+            "268          269         1       1   \n",
+            "275          276         1       1   \n",
+            "299          300         1       1   \n",
+            "337          338         1       1   \n",
+            "366          367         1       1   \n",
+            "380          381         1       1   \n",
+            "449          450         1       1   \n",
+            "453          454         1       1   \n",
+            "460          461         1       1   \n",
+            "496          497         1       1   \n",
+            "513          514         1       1   \n",
+            "523          524         1       1   \n",
+            "556          557         1       1   \n",
+            "571          572         1       1   \n",
+            "587          588         1       1   \n",
+            "591          592         1       1   \n",
+            "599          600         1       1   \n",
+            "621          622         1       1   \n",
+            "630          631         1       1   \n",
+            "645          646         1       1   \n",
+            "647          648         1       1   \n",
+            "660          661         1       1   \n",
+            "707          708         1       1   \n",
+            "712          713         1       1   \n",
+            "765          766         1       1   \n",
+            "779          780         1       1   \n",
+            "796          797         1       1   \n",
+            "820          821         1       1   \n",
+            "829          830         1       1   \n",
+            "856          857         1       1   \n",
+            "857          858         1       1   \n",
+            "862          863         1       1   \n",
+            "871          872         1       1   \n",
+            "879          880         1       1   \n",
+            "\n",
+            "                                                  Name     Sex   Age  SibSp  \\\n",
+            "11                            Bonnell, Miss. Elizabeth  female  58.0      0   \n",
+            "52            Harper, Mrs. Henry Sleeper (Myna Haxtun)  female  49.0      1   \n",
+            "187      Romaine, Mr. Charles Hallace (\"Mr C Rolmane\")    male  45.0      0   \n",
+            "194          Brown, Mrs. James Joseph (Margaret Tobin)  female  44.0      0   \n",
+            "195                               Lurette, Miss. Elise  female  58.0      0   \n",
+            "268      Graham, Mrs. William Thompson (Edith Junkins)  female  58.0      0   \n",
+            "275                  Andrews, Miss. Kornelia Theodosia  female  63.0      1   \n",
+            "299    Baxter, Mrs. James (Helene DeLaudeniere Chaput)  female  50.0      0   \n",
+            "337                    Burns, Miss. Elizabeth Margaret  female  41.0      0   \n",
+            "366   Warren, Mrs. Frank Manley (Anna Sophia Atkinson)  female  60.0      1   \n",
+            "380                              Bidois, Miss. Rosalie  female  42.0      0   \n",
+            "449                     Peuchen, Major. Arthur Godfrey    male  52.0      0   \n",
+            "453                           Goldenberg, Mr. Samuel L    male  49.0      1   \n",
+            "460                                Anderson, Mr. Harry    male  48.0      0   \n",
+            "496                     Eustis, Miss. Elizabeth Mussey  female  54.0      1   \n",
+            "513     Rothschild, Mrs. Martin (Elizabeth L. Barrett)  female  54.0      1   \n",
+            "523    Hippach, Mrs. Louis Albert (Ida Sophia Fischer)  female  44.0      0   \n",
+            "556  Duff Gordon, Lady. (Lucille Christiana Sutherl...  female  48.0      1   \n",
+            "571      Appleton, Mrs. Edward Dale (Charlotte Lamson)  female  53.0      2   \n",
+            "587                   Frolicher-Stehli, Mr. Maxmillian    male  60.0      1   \n",
+            "591    Stephenson, Mrs. Walter Bertram (Martha Eustis)  female  52.0      1   \n",
+            "599       Duff Gordon, Sir. Cosmo Edmund (\"Mr Morgan\")    male  49.0      1   \n",
+            "621                       Kimball, Mr. Edwin Nelson Jr    male  42.0      1   \n",
+            "630               Barkworth, Mr. Algernon Henry Wilson    male  80.0      0   \n",
+            "645                          Harper, Mr. Henry Sleeper    male  48.0      1   \n",
+            "647                Simonius-Blumer, Col. Oberst Alfons    male  56.0      0   \n",
+            "660                      Frauenthal, Dr. Henry William    male  50.0      2   \n",
+            "707                  Calderhead, Mr. Edward Pennington    male  42.0      0   \n",
+            "712                           Taylor, Mr. Elmer Zebley    male  48.0      1   \n",
+            "765               Hogeboom, Mrs. John C (Anna Andrews)  female  51.0      1   \n",
+            "779  Robert, Mrs. Edward Scott (Elisabeth Walton Mc...  female  43.0      0   \n",
+            "796                        Leader, Dr. Alice (Farnham)  female  49.0      0   \n",
+            "820  Hays, Mrs. Charles Melville (Clara Jennings Gr...  female  52.0      1   \n",
+            "829          Stone, Mrs. George Nelson (Martha Evelyn)  female  62.0      0   \n",
+            "856         Wick, Mrs. George Dennick (Mary Hitchcock)  female  45.0      1   \n",
+            "857                             Daly, Mr. Peter Denis     male  51.0      0   \n",
+            "862  Swift, Mrs. Frederick Joel (Margaret Welles Ba...  female  48.0      0   \n",
+            "871   Beckwith, Mrs. Richard Leonard (Sallie Monypeny)  female  47.0      1   \n",
+            "879      Potter, Mrs. Thomas Jr (Lily Alexenia Wilson)  female  56.0      0   \n",
+            "\n",
+            "     Parch    Ticket      Fare    Cabin Embarked  \n",
+            "11       0    113783   26.5500     C103        S  \n",
+            "52       0  PC 17572   76.7292      D33        C  \n",
+            "187      0    111428   26.5500  Unknown        S  \n",
+            "194      0  PC 17610   27.7208       B4        C  \n",
+            "195      0  PC 17569  146.5208      B80        C  \n",
+            "268      1  PC 17582  153.4625     C125        S  \n",
+            "275      0     13502   77.9583       D7        S  \n",
+            "299      1  PC 17558  247.5208  B58 B60        C  \n",
+            "337      0     16966  134.5000      E40        C  \n",
+            "366      0    110813   75.2500      D37        C  \n",
+            "380      0  PC 17757  227.5250  Unknown        C  \n",
+            "449      0    113786   30.5000     C104        S  \n",
+            "453      0     17453   89.1042      C92        C  \n",
+            "460      0     19952   26.5500      E12        S  \n",
+            "496      0     36947   78.2667      D20        C  \n",
+            "513      0  PC 17603   59.4000  Unknown        C  \n",
+            "523      1    111361   57.9792      B18        C  \n",
+            "556      0     11755   39.6000      A16        C  \n",
+            "571      0     11769   51.4792     C101        S  \n",
+            "587      1     13567   79.2000      B41        C  \n",
+            "591      0     36947   78.2667      D20        C  \n",
+            "599      0  PC 17485   56.9292      A20        C  \n",
+            "621      0     11753   52.5542      D19        S  \n",
+            "630      0     27042   30.0000      A23        S  \n",
+            "645      0  PC 17572   76.7292      D33        C  \n",
+            "647      0     13213   35.5000      A26        C  \n",
+            "660      0  PC 17611  133.6500  Unknown        S  \n",
+            "707      0  PC 17476   26.2875      E24        S  \n",
+            "712      0     19996   52.0000     C126        S  \n",
+            "765      0     13502   77.9583      D11        S  \n",
+            "779      1     24160  211.3375       B3        S  \n",
+            "796      0     17465   25.9292      D17        S  \n",
+            "820      1     12749   93.5000      B69        S  \n",
+            "829      0    113572   80.0000      B28        S  \n",
+            "856      1     36928  164.8667  Unknown        S  \n",
+            "857      0    113055   26.5500      E17        S  \n",
+            "862      0     17466   25.9292      D17        S  \n",
+            "871      1     11751   52.5542      D35        S  \n",
+            "879      1     11767   83.1583      C50        C  \n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "high_paying_males = titanic_df[(titanic_df['Sex'] == 'male') & (titanic_df['Fare'] > 100)]\n",
+        "print(\"Male passengers who paid a fare greater than 100:\")\n",
+        "print(high_paying_males)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "6FDUybETnXNC",
+        "outputId": "c1ff4713-9121-4e4a-e693-944533fbd78d"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Male passengers who paid a fare greater than 100:\n",
+            "     PassengerId  Survived  Pclass  \\\n",
+            "27            28         0       1   \n",
+            "118          119         0       1   \n",
+            "305          306         1       1   \n",
+            "332          333         0       1   \n",
+            "373          374         0       1   \n",
+            "377          378         0       1   \n",
+            "390          391         1       1   \n",
+            "438          439         0       1   \n",
+            "505          506         0       1   \n",
+            "527          528         0       1   \n",
+            "544          545         0       1   \n",
+            "550          551         1       1   \n",
+            "557          558         0       1   \n",
+            "659          660         0       1   \n",
+            "660          661         1       1   \n",
+            "679          680         1       1   \n",
+            "698          699         0       1   \n",
+            "737          738         1       1   \n",
+            "802          803         1       1   \n",
+            "\n",
+            "                                           Name   Sex        Age  SibSp  \\\n",
+            "27               Fortune, Mr. Charles Alexander  male  19.000000      3   \n",
+            "118                    Baxter, Mr. Quigg Edmond  male  24.000000      0   \n",
+            "305              Allison, Master. Hudson Trevor  male   0.920000      1   \n",
+            "332                   Graham, Mr. George Edward  male  38.000000      0   \n",
+            "373                         Ringhini, Mr. Sante  male  22.000000      0   \n",
+            "377                   Widener, Mr. Harry Elkins  male  27.000000      0   \n",
+            "390                  Carter, Mr. William Ernest  male  36.000000      1   \n",
+            "438                           Fortune, Mr. Mark  male  64.000000      1   \n",
+            "505  Penasco y Castellana, Mr. Victor de Satode  male  18.000000      1   \n",
+            "527                          Farthing, Mr. John  male  29.699118      0   \n",
+            "544                  Douglas, Mr. Walter Donald  male  50.000000      1   \n",
+            "550                 Thayer, Mr. John Borland Jr  male  17.000000      0   \n",
+            "557                         Robbins, Mr. Victor  male  29.699118      0   \n",
+            "659                  Newell, Mr. Arthur Webster  male  58.000000      0   \n",
+            "660               Frauenthal, Dr. Henry William  male  50.000000      2   \n",
+            "679          Cardeza, Mr. Thomas Drake Martinez  male  36.000000      0   \n",
+            "698                    Thayer, Mr. John Borland  male  49.000000      1   \n",
+            "737                      Lesurer, Mr. Gustave J  male  35.000000      0   \n",
+            "802         Carter, Master. William Thornton II  male  11.000000      1   \n",
+            "\n",
+            "     Parch    Ticket      Fare        Cabin Embarked  \n",
+            "27       2     19950  263.0000  C23 C25 C27        S  \n",
+            "118      1  PC 17558  247.5208      B58 B60        C  \n",
+            "305      2    113781  151.5500      C22 C26        S  \n",
+            "332      1  PC 17582  153.4625          C91        S  \n",
+            "373      0  PC 17760  135.6333      Unknown        C  \n",
+            "377      2    113503  211.5000          C82        C  \n",
+            "390      2    113760  120.0000      B96 B98        S  \n",
+            "438      4     19950  263.0000  C23 C25 C27        S  \n",
+            "505      0  PC 17758  108.9000          C65        C  \n",
+            "527      0  PC 17483  221.7792          C95        S  \n",
+            "544      0  PC 17761  106.4250          C86        C  \n",
+            "550      2     17421  110.8833          C70        C  \n",
+            "557      0  PC 17757  227.5250      Unknown        C  \n",
+            "659      2     35273  113.2750          D48        C  \n",
+            "660      0  PC 17611  133.6500      Unknown        S  \n",
+            "679      1  PC 17755  512.3292  B51 B53 B55        C  \n",
+            "698      1     17421  110.8833          C68        C  \n",
+            "737      0  PC 17755  512.3292         B101        C  \n",
+            "802      2    113760  120.0000      B96 B98        S  \n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "embarked_C_class_2 = titanic_df[(titanic_df['Embarked'] == 'C') & (titanic_df['Pclass'] == 2)]\n",
+        "print(\"Passengers embarked from 'C' and in Class 2:\")\n",
+        "print(embarked_C_class_2)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "LUZKz36Pnb9I",
+        "outputId": "e3654048-e58d-4c78-ee5c-64c77cf5f638"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Passengers embarked from 'C' and in Class 2:\n",
+            "     PassengerId  Survived  Pclass  \\\n",
+            "9             10         1       2   \n",
+            "43            44         1       2   \n",
+            "122          123         0       2   \n",
+            "135          136         0       2   \n",
+            "181          182         0       2   \n",
+            "292          293         0       2   \n",
+            "308          309         0       2   \n",
+            "361          362         0       2   \n",
+            "389          390         1       2   \n",
+            "473          474         1       2   \n",
+            "547          548         1       2   \n",
+            "608          609         1       2   \n",
+            "685          686         0       2   \n",
+            "817          818         0       2   \n",
+            "827          828         1       2   \n",
+            "866          867         1       2   \n",
+            "874          875         1       2   \n",
+            "\n",
+            "                                                  Name     Sex        Age  \\\n",
+            "9                  Nasser, Mrs. Nicholas (Adele Achem)  female  14.000000   \n",
+            "43            Laroche, Miss. Simonne Marie Anne Andree  female   3.000000   \n",
+            "122                               Nasser, Mr. Nicholas    male  32.500000   \n",
+            "135                                 Richard, Mr. Emile    male  23.000000   \n",
+            "181                                   Pernot, Mr. Rene    male  29.699118   \n",
+            "292                             Levy, Mr. Rene Jacques    male  36.000000   \n",
+            "308                                Abelson, Mr. Samuel    male  30.000000   \n",
+            "361                          del Carlo, Mr. Sebastiano    male  29.000000   \n",
+            "389                              Lehmann, Miss. Bertha  female  17.000000   \n",
+            "473       Jerwan, Mrs. Amin S (Marie Marthe Thuillard)  female  23.000000   \n",
+            "547                         Padro y Manent, Mr. Julian    male  29.699118   \n",
+            "608  Laroche, Mrs. Joseph (Juliette Marie Louise La...  female  22.000000   \n",
+            "685             Laroche, Mr. Joseph Philippe Lemercier    male  25.000000   \n",
+            "817                                 Mallet, Mr. Albert    male  31.000000   \n",
+            "827                              Mallet, Master. Andre    male   1.000000   \n",
+            "866                       Duran y More, Miss. Asuncion  female  27.000000   \n",
+            "874              Abelson, Mrs. Samuel (Hannah Wizosky)  female  28.000000   \n",
+            "\n",
+            "     SibSp  Parch           Ticket     Fare    Cabin Embarked  \n",
+            "9        1      0           237736  30.0708  Unknown        C  \n",
+            "43       1      2    SC/Paris 2123  41.5792  Unknown        C  \n",
+            "122      1      0           237736  30.0708  Unknown        C  \n",
+            "135      0      0    SC/PARIS 2133  15.0458  Unknown        C  \n",
+            "181      0      0    SC/PARIS 2131  15.0500  Unknown        C  \n",
+            "292      0      0    SC/Paris 2163  12.8750        D        C  \n",
+            "308      1      0        P/PP 3381  24.0000  Unknown        C  \n",
+            "361      1      0    SC/PARIS 2167  27.7208  Unknown        C  \n",
+            "389      0      0          SC 1748  12.0000  Unknown        C  \n",
+            "473      0      0  SC/AH Basle 541  13.7917        D        C  \n",
+            "547      0      0    SC/PARIS 2146  13.8625  Unknown        C  \n",
+            "608      1      2    SC/Paris 2123  41.5792  Unknown        C  \n",
+            "685      1      2    SC/Paris 2123  41.5792  Unknown        C  \n",
+            "817      1      1  S.C./PARIS 2079  37.0042  Unknown        C  \n",
+            "827      0      2  S.C./PARIS 2079  37.0042  Unknown        C  \n",
+            "866      1      0    SC/PARIS 2149  13.8583  Unknown        C  \n",
+            "874      1      0        P/PP 3381  24.0000  Unknown        C  \n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "sibsp_gt_2 = titanic_df[titanic_df['SibSp'] > 2]\n",
+        "print(\"Passengers with more than 2 siblings/spouses aboard:\")\n",
+        "print(sibsp_gt_2)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "gPFBIQSLnfrB",
+        "outputId": "a1f7f968-c3e5-4e0e-cdc1-ed5741563ea5"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Passengers with more than 2 siblings/spouses aboard:\n",
+            "     PassengerId  Survived  Pclass  \\\n",
+            "7              8         0       3   \n",
+            "16            17         0       3   \n",
+            "24            25         0       3   \n",
+            "27            28         0       1   \n",
+            "50            51         0       3   \n",
+            "59            60         0       3   \n",
+            "63            64         0       3   \n",
+            "68            69         1       3   \n",
+            "71            72         0       3   \n",
+            "85            86         1       3   \n",
+            "88            89         1       1   \n",
+            "119          120         0       3   \n",
+            "159          160         0       3   \n",
+            "164          165         0       3   \n",
+            "171          172         0       3   \n",
+            "176          177         0       3   \n",
+            "180          181         0       3   \n",
+            "182          183         0       3   \n",
+            "201          202         0       3   \n",
+            "229          230         0       3   \n",
+            "233          234         1       3   \n",
+            "261          262         1       3   \n",
+            "266          267         0       3   \n",
+            "278          279         0       3   \n",
+            "324          325         0       3   \n",
+            "341          342         1       1   \n",
+            "374          375         0       3   \n",
+            "386          387         0       3   \n",
+            "409          410         0       3   \n",
+            "480          481         0       3   \n",
+            "485          486         0       3   \n",
+            "541          542         0       3   \n",
+            "542          543         0       3   \n",
+            "634          635         0       3   \n",
+            "642          643         0       3   \n",
+            "683          684         0       3   \n",
+            "686          687         0       3   \n",
+            "726          727         1       2   \n",
+            "787          788         0       3   \n",
+            "792          793         0       3   \n",
+            "813          814         0       3   \n",
+            "819          820         0       3   \n",
+            "824          825         0       3   \n",
+            "846          847         0       3   \n",
+            "850          851         0       3   \n",
+            "863          864         0       3   \n",
+            "\n",
+            "                                                  Name     Sex        Age  \\\n",
+            "7                       Palsson, Master. Gosta Leonard    male   2.000000   \n",
+            "16                                Rice, Master. Eugene    male   2.000000   \n",
+            "24                       Palsson, Miss. Torborg Danira  female   8.000000   \n",
+            "27                      Fortune, Mr. Charles Alexander    male  19.000000   \n",
+            "50                          Panula, Master. Juha Niilo    male   7.000000   \n",
+            "59                  Goodwin, Master. William Frederick    male  11.000000   \n",
+            "63                               Skoog, Master. Harald    male   4.000000   \n",
+            "68                     Andersson, Miss. Erna Alexandra  female  17.000000   \n",
+            "71                          Goodwin, Miss. Lillian Amy  female  16.000000   \n",
+            "85   Backstrom, Mrs. Karl Alfred (Maria Mathilda Gu...  female  33.000000   \n",
+            "88                          Fortune, Miss. Mabel Helen  female  23.000000   \n",
+            "119                  Andersson, Miss. Ellis Anna Maria  female   2.000000   \n",
+            "159                         Sage, Master. Thomas Henry    male  29.699118   \n",
+            "164                       Panula, Master. Eino Viljami    male   1.000000   \n",
+            "171                               Rice, Master. Arthur    male   4.000000   \n",
+            "176                      Lefebre, Master. Henry Forbes    male  29.699118   \n",
+            "180                       Sage, Miss. Constance Gladys  female  29.699118   \n",
+            "182              Asplund, Master. Clarence Gustaf Hugo    male   9.000000   \n",
+            "201                                Sage, Mr. Frederick    male  29.699118   \n",
+            "229                            Lefebre, Miss. Mathilde  female  29.699118   \n",
+            "233                     Asplund, Miss. Lillian Gertrud  female   5.000000   \n",
+            "261                  Asplund, Master. Edvin Rojj Felix    male   3.000000   \n",
+            "266                          Panula, Mr. Ernesti Arvid    male  16.000000   \n",
+            "278                                 Rice, Master. Eric    male   7.000000   \n",
+            "324                           Sage, Mr. George John Jr    male  29.699118   \n",
+            "341                     Fortune, Miss. Alice Elizabeth  female  24.000000   \n",
+            "374                         Palsson, Miss. Stina Viola  female   3.000000   \n",
+            "386                    Goodwin, Master. Sidney Leonard    male   1.000000   \n",
+            "409                                 Lefebre, Miss. Ida  female  29.699118   \n",
+            "480                     Goodwin, Master. Harold Victor    male   9.000000   \n",
+            "485                             Lefebre, Miss. Jeannie  female  29.699118   \n",
+            "541               Andersson, Miss. Ingeborg Constanzia  female   9.000000   \n",
+            "542                  Andersson, Miss. Sigrid Elisabeth  female  11.000000   \n",
+            "634                                 Skoog, Miss. Mabel  female   9.000000   \n",
+            "642                      Skoog, Miss. Margit Elizabeth  female   2.000000   \n",
+            "683                        Goodwin, Mr. Charles Edward    male  14.000000   \n",
+            "686                           Panula, Mr. Jaako Arnold    male  14.000000   \n",
+            "726        Renouf, Mrs. Peter Henry (Lillian Jefferys)  female  30.000000   \n",
+            "787                          Rice, Master. George Hugh    male   8.000000   \n",
+            "792                            Sage, Miss. Stella Anna  female  29.699118   \n",
+            "813                 Andersson, Miss. Ebba Iris Alfrida  female   6.000000   \n",
+            "819                       Skoog, Master. Karl Thorsten    male  10.000000   \n",
+            "824                       Panula, Master. Urho Abraham    male   2.000000   \n",
+            "846                           Sage, Mr. Douglas Bullen    male  29.699118   \n",
+            "850            Andersson, Master. Sigvard Harald Elias    male   4.000000   \n",
+            "863                  Sage, Miss. Dorothy Edith \"Dolly\"  female  29.699118   \n",
+            "\n",
+            "     SibSp  Parch    Ticket      Fare        Cabin Embarked  \n",
+            "7        3      1    349909   21.0750      Unknown        S  \n",
+            "16       4      1    382652   29.1250      Unknown        Q  \n",
+            "24       3      1    349909   21.0750      Unknown        S  \n",
+            "27       3      2     19950  263.0000  C23 C25 C27        S  \n",
+            "50       4      1   3101295   39.6875      Unknown        S  \n",
+            "59       5      2   CA 2144   46.9000      Unknown        S  \n",
+            "63       3      2    347088   27.9000      Unknown        S  \n",
+            "68       4      2   3101281    7.9250      Unknown        S  \n",
+            "71       5      2   CA 2144   46.9000      Unknown        S  \n",
+            "85       3      0   3101278   15.8500      Unknown        S  \n",
+            "88       3      2     19950  263.0000  C23 C25 C27        S  \n",
+            "119      4      2    347082   31.2750      Unknown        S  \n",
+            "159      8      2  CA. 2343   69.5500      Unknown        S  \n",
+            "164      4      1   3101295   39.6875      Unknown        S  \n",
+            "171      4      1    382652   29.1250      Unknown        Q  \n",
+            "176      3      1      4133   25.4667      Unknown        S  \n",
+            "180      8      2  CA. 2343   69.5500      Unknown        S  \n",
+            "182      4      2    347077   31.3875      Unknown        S  \n",
+            "201      8      2  CA. 2343   69.5500      Unknown        S  \n",
+            "229      3      1      4133   25.4667      Unknown        S  \n",
+            "233      4      2    347077   31.3875      Unknown        S  \n",
+            "261      4      2    347077   31.3875      Unknown        S  \n",
+            "266      4      1   3101295   39.6875      Unknown        S  \n",
+            "278      4      1    382652   29.1250      Unknown        Q  \n",
+            "324      8      2  CA. 2343   69.5500      Unknown        S  \n",
+            "341      3      2     19950  263.0000  C23 C25 C27        S  \n",
+            "374      3      1    349909   21.0750      Unknown        S  \n",
+            "386      5      2   CA 2144   46.9000      Unknown        S  \n",
+            "409      3      1      4133   25.4667      Unknown        S  \n",
+            "480      5      2   CA 2144   46.9000      Unknown        S  \n",
+            "485      3      1      4133   25.4667      Unknown        S  \n",
+            "541      4      2    347082   31.2750      Unknown        S  \n",
+            "542      4      2    347082   31.2750      Unknown        S  \n",
+            "634      3      2    347088   27.9000      Unknown        S  \n",
+            "642      3      2    347088   27.9000      Unknown        S  \n",
+            "683      5      2   CA 2144   46.9000      Unknown        S  \n",
+            "686      4      1   3101295   39.6875      Unknown        S  \n",
+            "726      3      0     31027   21.0000      Unknown        S  \n",
+            "787      4      1    382652   29.1250      Unknown        Q  \n",
+            "792      8      2  CA. 2343   69.5500      Unknown        S  \n",
+            "813      4      2    347082   31.2750      Unknown        S  \n",
+            "819      3      2    347088   27.9000      Unknown        S  \n",
+            "824      4      1   3101295   39.6875      Unknown        S  \n",
+            "846      8      2  CA. 2343   69.5500      Unknown        S  \n",
+            "850      4      2    347082   31.2750      Unknown        S  \n",
+            "863      8      2  CA. 2343   69.5500      Unknown        S  \n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "no_family_died = titanic_df[(titanic_df['Survived'] == 0) &\n",
+        "                            (titanic_df['SibSp'] == 0) &\n",
+        "                            (titanic_df['Parch'] == 0)]\n",
+        "print(\"Passengers who did not survive and had no family aboard:\")\n",
+        "print(no_family_died)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "xa0KLxIcn6LI",
+        "outputId": "5da29060-548d-4cc0-b1c6-0e4489bdff33"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Passengers who did not survive and had no family aboard:\n",
+            "     PassengerId  Survived  Pclass                                  Name  \\\n",
+            "4              5         0       3              Allen, Mr. William Henry   \n",
+            "5              6         0       3                      Moran, Mr. James   \n",
+            "6              7         0       1               McCarthy, Mr. Timothy J   \n",
+            "12            13         0       3        Saundercock, Mr. William Henry   \n",
+            "14            15         0       3  Vestrom, Miss. Hulda Amanda Adolfina   \n",
+            "..           ...       ...     ...                                   ...   \n",
+            "882          883         0       3          Dahlberg, Miss. Gerda Ulrika   \n",
+            "883          884         0       2         Banfield, Mr. Frederick James   \n",
+            "884          885         0       3                Sutehall, Mr. Henry Jr   \n",
+            "886          887         0       2                 Montvila, Rev. Juozas   \n",
+            "890          891         0       3                   Dooley, Mr. Patrick   \n",
+            "\n",
+            "        Sex        Age  SibSp  Parch            Ticket     Fare    Cabin  \\\n",
+            "4      male  35.000000      0      0            373450   8.0500  Unknown   \n",
+            "5      male  29.699118      0      0            330877   8.4583  Unknown   \n",
+            "6      male  54.000000      0      0             17463  51.8625      E46   \n",
+            "12     male  20.000000      0      0         A/5. 2151   8.0500  Unknown   \n",
+            "14   female  14.000000      0      0            350406   7.8542  Unknown   \n",
+            "..      ...        ...    ...    ...               ...      ...      ...   \n",
+            "882  female  22.000000      0      0              7552  10.5167  Unknown   \n",
+            "883    male  28.000000      0      0  C.A./SOTON 34068  10.5000  Unknown   \n",
+            "884    male  25.000000      0      0   SOTON/OQ 392076   7.0500  Unknown   \n",
+            "886    male  27.000000      0      0            211536  13.0000  Unknown   \n",
+            "890    male  32.000000      0      0            370376   7.7500  Unknown   \n",
+            "\n",
+            "    Embarked  \n",
+            "4          S  \n",
+            "5          Q  \n",
+            "6          S  \n",
+            "12         S  \n",
+            "14         S  \n",
+            "..       ...  \n",
+            "882        S  \n",
+            "883        S  \n",
+            "884        S  \n",
+            "886        S  \n",
+            "890        Q  \n",
+            "\n",
+            "[374 rows x 12 columns]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "survived_passengers = titanic_df[titanic_df['Survived'] == 1]\n",
+        "oldest_5_survivors = survived_passengers.sort_values(by='Age', ascending=False).head(5)\n",
+        "print(\"Top 5 oldest passengers who survived:\")\n",
+        "print(oldest_5_survivors)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "wzAcFVEXoDsI",
+        "outputId": "22cff750-47f9-47cd-c0ef-d7bd4ce55f27"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Top 5 oldest passengers who survived:\n",
+            "     PassengerId  Survived  Pclass                                       Name  \\\n",
+            "630          631         1       1       Barkworth, Mr. Algernon Henry Wilson   \n",
+            "275          276         1       1          Andrews, Miss. Kornelia Theodosia   \n",
+            "483          484         1       3                     Turkula, Mrs. (Hedwig)   \n",
+            "570          571         1       2                         Harris, Mr. George   \n",
+            "829          830         1       1  Stone, Mrs. George Nelson (Martha Evelyn)   \n",
+            "\n",
+            "        Sex   Age  SibSp  Parch       Ticket     Fare    Cabin Embarked  \n",
+            "630    male  80.0      0      0        27042  30.0000      A23        S  \n",
+            "275  female  63.0      1      0        13502  77.9583       D7        S  \n",
+            "483  female  63.0      0      0         4134   9.5875  Unknown        S  \n",
+            "570    male  62.0      0      0  S.W./PP 752  10.5000  Unknown        S  \n",
+            "829  female  62.0      0      0       113572  80.0000      B28        S  \n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "zero_fare_passengers = titanic_df[titanic_df['Fare'] == 0]\n",
+        "print(\"Passengers who paid zero fare:\")\n",
+        "print(zero_fare_passengers)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "brRos5g6oI4Y",
+        "outputId": "7be1cd67-15b4-41c2-f53b-df91416a029b"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Passengers who paid zero fare:\n",
+            "     PassengerId  Survived  Pclass                              Name   Sex  \\\n",
+            "179          180         0       3               Leonard, Mr. Lionel  male   \n",
+            "263          264         0       1             Harrison, Mr. William  male   \n",
+            "271          272         1       3      Tornquist, Mr. William Henry  male   \n",
+            "277          278         0       2       Parkes, Mr. Francis \"Frank\"  male   \n",
+            "302          303         0       3   Johnson, Mr. William Cahoone Jr  male   \n",
+            "413          414         0       2    Cunningham, Mr. Alfred Fleming  male   \n",
+            "466          467         0       2             Campbell, Mr. William  male   \n",
+            "481          482         0       2  Frost, Mr. Anthony Wood \"Archie\"  male   \n",
+            "597          598         0       3               Johnson, Mr. Alfred  male   \n",
+            "633          634         0       1     Parr, Mr. William Henry Marsh  male   \n",
+            "674          675         0       2        Watson, Mr. Ennis Hastings  male   \n",
+            "732          733         0       2              Knight, Mr. Robert J  male   \n",
+            "806          807         0       1            Andrews, Mr. Thomas Jr  male   \n",
+            "815          816         0       1                  Fry, Mr. Richard  male   \n",
+            "822          823         0       1   Reuchlin, Jonkheer. John George  male   \n",
+            "\n",
+            "           Age  SibSp  Parch  Ticket  Fare    Cabin Embarked  \n",
+            "179  36.000000      0      0    LINE   0.0  Unknown        S  \n",
+            "263  40.000000      0      0  112059   0.0      B94        S  \n",
+            "271  25.000000      0      0    LINE   0.0  Unknown        S  \n",
+            "277  29.699118      0      0  239853   0.0  Unknown        S  \n",
+            "302  19.000000      0      0    LINE   0.0  Unknown        S  \n",
+            "413  29.699118      0      0  239853   0.0  Unknown        S  \n",
+            "466  29.699118      0      0  239853   0.0  Unknown        S  \n",
+            "481  29.699118      0      0  239854   0.0  Unknown        S  \n",
+            "597  49.000000      0      0    LINE   0.0  Unknown        S  \n",
+            "633  29.699118      0      0  112052   0.0  Unknown        S  \n",
+            "674  29.699118      0      0  239856   0.0  Unknown        S  \n",
+            "732  29.699118      0      0  239855   0.0  Unknown        S  \n",
+            "806  39.000000      0      0  112050   0.0      A36        S  \n",
+            "815  29.699118      0      0  112058   0.0     B102        S  \n",
+            "822  38.000000      0      0   19972   0.0  Unknown        S  \n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "columns_to_remove = ['Survived', 'Name', 'Ticket', 'Cabin']\n",
+        "features = titanic_df.drop(columns=columns_to_remove)\n",
+        "target = titanic_df['Survived']\n",
+        "features_encoded = pd.get_dummies(features)\n",
+        "X_train, X_test, y_train, y_test = train_test_split(features_encoded, target, test_size=0.2, random_state=1)\n",
+        "print(\"Training features shape:\", X_train.shape)\n",
+        "print(\"Testing features shape:\", X_test.shape)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "0BDXjRd6oLkI",
+        "outputId": "75d48b61-97c4-4703-c9ba-0c68536e6f8e"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Training features shape: (712, 11)\n",
+            "Testing features shape: (179, 11)\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [],
+      "metadata": {
+        "id": "m_sjqrM2oNzo"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ],
+  "metadata": {
+    "colab": {
+      "provenance": []
+    },
+    "kernelspec": {
+      "display_name": "Python 3",
+      "name": "python3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 0
+}
